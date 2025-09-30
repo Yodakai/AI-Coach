@@ -35,17 +35,21 @@ function keyFor(userKey: string) {
 export async function listBets(userKey: string): Promise<BetRow[]> {
   if (!userKey) return [];
   if (useKV) {
-    const j = await kvFetch(`/get/${encodeURIComponent(keyFor(userKey))}`, { method: "GET" }).catch(() => ({ result: null }));
+    const j = await kvFetch(`/get/${encodeURIComponent(keyFor(userKey))}`, { method: "GET" })
+      .catch(() => ({ result: null }));
     return j?.result ? JSON.parse(j.result) as BetRow[] : [];
   }
   return memory[userKey] || [];
 }
 
-export async function saveBet(userKey: string, row: Omit<BetRow, "id" | "createdAt" | "userKey">): Promise<BetRow> {
+export async function saveBet(
+  userKey: string,
+  row: Omit<BetRow, "id" | "createdAt" | "userKey">
+): Promise<BetRow> {
   const id = crypto.randomUUID();
   const now = Date.now();
 
-  // ✅ Option 2 fix: spread row first, then overwrite with userKey
+  // ✅ Option 2: spread row first, then userKey overrides it
   const full: BetRow = { id, createdAt: now, ...row, userKey };
 
   if (useKV) {
@@ -62,7 +66,11 @@ export async function saveBet(userKey: string, row: Omit<BetRow, "id" | "created
   return full;
 }
 
-export async function updateBet(userKey: string, id: string, patch: Partial<BetRow>): Promise<BetRow | null> {
+export async function updateBet(
+  userKey: string,
+  id: string,
+  patch: Partial<BetRow>
+): Promise<BetRow | null> {
   if (useKV) {
     const cur = await listBets(userKey);
     const idx = cur.findIndex(b => b.id === id);
