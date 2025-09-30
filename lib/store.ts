@@ -41,15 +41,20 @@ export async function listBets(userKey: string): Promise<BetRow[]> {
   return memory[userKey] || [];
 }
 
-export async function saveBet(userKey: string, row: Omit<BetRow, "id" | "createdAt">): Promise<BetRow> {
+export async function saveBet(userKey: string, row: Omit<BetRow, "id" | "createdAt" | "userKey">): Promise<BetRow> {
   const id = crypto.randomUUID();
   const now = Date.now();
-  const full: BetRow = { id, createdAt: now, userKey, ...row };
+
+  // ✅ Option 2 fix: spread row first, then overwrite with userKey
+  const full: BetRow = { id, createdAt: now, ...row, userKey };
 
   if (useKV) {
     const cur = await listBets(userKey);
     const next = [...cur, full];
-    await kvFetch(`/set/${encodeURIComponent(keyFor(userKey))}`, { method: "POST", body: JSON.stringify({ value: JSON.stringify(next) }) });
+    await kvFetch(
+      `/set/${encodeURIComponent(keyFor(userKey))}`,
+      { method: "POST", body: JSON.stringify({ value: JSON.stringify(next) }) }
+    );
     return full;
   }
 
@@ -64,9 +69,13 @@ export async function updateBet(userKey: string, id: string, patch: Partial<BetR
     if (idx < 0) return null;
     const upd = { ...cur[idx], ...patch };
     cur[idx] = upd;
-    await kvFetch(`/set/${encodeURIComponent(keyFor(userKey))}`, { method: "POST", body: JSON.stringify({ value: JSON.stringify(cur) }) });
+    await kvFetch(
+      `/set/${encodeURIComponent(keyFor(userKey))}`,
+      { method: "POST", body: JSON.stringify({ value: JSON.stringify(cur) }) }
+    );
     return upd;
   }
+
   const cur = memory[userKey] || [];
   const idx = cur.findIndex(b => b.id === id);
   if (idx < 0) return null;
@@ -74,4 +83,3 @@ export async function updateBet(userKey: string, id: string, patch: Partial<BetR
   memory[userKey] = cur;
   return cur[idx];
 }
-
