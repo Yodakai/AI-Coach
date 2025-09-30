@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html, body {
+  @apply bg-bg text-text;
+}
+
+.card {
+  @apply bg-panel rounded-2xl shadow-panel border border-slate-800;
+}
+
+.input, .btn, textarea, select {
+  @apply rounded-xl border border-slate-800 bg-slate-900/70 text-text px-3 py-2;
+}
+
+.btn-primary {
+  @apply bg-accent text-black font-semibold border-0;
+}
+
+.label {
+  @apply text-sm text-muted;
+}
+
+.kbd {
+  @apply inline-flex items-center justify-center rounded-md border border-slate-700 px-2 py-0.5 text-xs text-muted;
+}
