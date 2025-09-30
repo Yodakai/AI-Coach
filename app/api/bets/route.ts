@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     const userKey = userKeyFromReq(req);
     const data = BetBody.parse(await req.json());
     const sportTag = data.sportTag || detectSport(data.event);
-    const row = await saveBet(userKey, { ...data, sportTag, userKey });
+    const row = await saveBet(userKey, { ...data, sportTag });
     return NextResponse.json(row);
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || "Bet save error" }, { status: 400 });
